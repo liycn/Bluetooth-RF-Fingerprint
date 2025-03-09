@@ -52,24 +52,24 @@ hackrf_transfer -r test.raw -f 2480000000 -s 10000000 -g 40 -l 20 -a 1
 =======
 ## 准备工作
 
-- 硬件：
-  - **HackRF One** 用于捕获 BLE 信号
-  - **天线** 确保使用支持 2.4 GHz 频段的天线
+### 硬件：
+- **HackRF One** 用于捕获 BLE 信号
+- **天线** 确保使用支持 2.4 GHz 频段的天线
 
-- 软件：
-  - **GNU Radio 3.7.0** 用于信号处理和调制解调，`sudo apt install gnuradio`。
-  - **gr-bluetooth** GNU Radio 的蓝牙模块，用于解调 BLE 信号，在 github 上 clone 就好了 地址 [https://github.com/greatscottgadgets/gr-bluetooth.git](https://github.com/greatscottgadgets/gr-bluetooth.git)
-    - 前提：git、cmake、
-    - 步骤
-        ```BASH
-        git clone https://github.com/greatscottgadgets/gr-bluetooth.git
-        cd gr-bluetooth
-        mkdir build
-        cd build
-        cmake ..
-        make
-        sudo make install
-        sudo ldconfig
-        ```
-  - **python** 用于后续的信号处理和特征提取。
->>>>>>> 4d609af0277fe1885fedfe657c322b1f8b8970ca
+### 软件：
+- **GNU Radio 3.7.0** 用于信号处理和调制解调，`sudo apt install gnuradio`。
+- **gr-bluetooth** GNU Radio 的蓝牙模块，用于解调 BLE 信号，在 github 上 clone 就好了 地址 [https://github.com/greatscottgadgets/gr-bluetooth.git](https://github.com/greatscottgadgets/gr-bluetooth.git)
+  - 前提：git、cmake、
+  - 步骤
+      ```BASH
+      git clone https://github.com/greatscottgadgets/gr-bluetooth.git
+      cd gr-bluetooth
+      mkdir build
+      cd build
+      cmake ..
+      make
+      sudo make install
+      sudo ldconfig
+      ```
+
+<!-- - **python** 用于后续的信号处理和特征提取。 -->
