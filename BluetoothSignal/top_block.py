@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Thu Mar  6 16:24:44 2025
+# Generated: Sun Mar  9 16:57:07 2025
 ##################################################
 
 from distutils.version import StrictVersion
@@ -68,7 +68,7 @@ class top_block(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.samp_rate = samp_rate = 10000000
-        self.Cent_freq = Cent_freq = 2.402e9
+        self.Frequency = Frequency = 2.48e9
 
         ##################################################
         # Blocks
@@ -127,7 +127,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
         	1024, #size
         	firdes.WIN_BLACKMAN_hARRIS, #wintype
-        	Cent_freq, #fc
+        	Frequency, #fc
         	3000000, #bw
         	"", #name
         	1 #number of inputs
@@ -169,18 +169,18 @@ class top_block(gr.top_block, Qt.QWidget):
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.osmosdr_source_0 = osmosdr.source( args="numchan=" + str(1) + " " + '' )
         self.osmosdr_source_0.set_sample_rate(samp_rate)
-        self.osmosdr_source_0.set_center_freq(Cent_freq, 0)
+        self.osmosdr_source_0.set_center_freq(Frequency, 0)
         self.osmosdr_source_0.set_freq_corr(0, 0)
         self.osmosdr_source_0.set_dc_offset_mode(0, 0)
         self.osmosdr_source_0.set_iq_balance_mode(0, 0)
         self.osmosdr_source_0.set_gain_mode(False, 0)
-        self.osmosdr_source_0.set_gain(40, 0)
+        self.osmosdr_source_0.set_gain(10, 0)
         self.osmosdr_source_0.set_if_gain(20, 0)
         self.osmosdr_source_0.set_bb_gain(20, 0)
         self.osmosdr_source_0.set_antenna('', 0)
         self.osmosdr_source_0.set_bandwidth(0, 0)
 
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, '/home/ubuntu/RF-Fingerprint-Extraction-for-Bluetooth/BluetoothSignal/Signal/signal37_group01', False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, '/home/ubuntu/RF-Fingerprint-Extraction-for-Bluetooth/BluetoothSignal/Signal/Frequency_38_01', False)
         self.blocks_file_sink_0.set_unbuffered(False)
 
         ##################################################
@@ -203,13 +203,13 @@ class top_block(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.osmosdr_source_0.set_sample_rate(self.samp_rate)
 
-    def get_Cent_freq(self):
-        return self.Cent_freq
+    def get_Frequency(self):
+        return self.Frequency
 
-    def set_Cent_freq(self, Cent_freq):
-        self.Cent_freq = Cent_freq
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.Cent_freq, 3000000)
-        self.osmosdr_source_0.set_center_freq(self.Cent_freq, 0)
+    def set_Frequency(self, Frequency):
+        self.Frequency = Frequency
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.Frequency, 3000000)
+        self.osmosdr_source_0.set_center_freq(self.Frequency, 0)
 
 
 def main(top_block_cls=top_block, options=None):
