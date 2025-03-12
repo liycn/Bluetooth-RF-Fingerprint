@@ -73,7 +73,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '10000000'
+    value: '4000000'
   states:
     bus_sink: false
     bus_source: false
@@ -88,7 +88,7 @@ blocks:
     alias: ''
     append: 'False'
     comment: ''
-    file: C:\Users\admin\Desktop\RF-Fingerprint-Extraction-for-Bluetooth\BluetoothSignal\signal\channal39_1
+    file: D:\RF-Fingerprint-Extraction-for-Bluetooth\BluetoothSignal\signal\ble_channel39_01.dat
     type: complex
     unbuffered: 'False'
     vlen: '1'
@@ -306,7 +306,7 @@ blocks:
     freq7: 100e6
     freq8: 100e6
     freq9: 100e6
-    gain0: '10'
+    gain0: '30'
     gain1: '10'
     gain10: '10'
     gain11: '10'

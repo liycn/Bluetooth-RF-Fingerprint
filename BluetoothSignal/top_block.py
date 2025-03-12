@@ -61,7 +61,7 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 10000000
+        self.samp_rate = samp_rate = 4000000
         self.Frequency = Frequency = 2.48e9
 
         ##################################################
@@ -171,12 +171,12 @@ class top_block(gr.top_block, Qt.QWidget):
         self.osmosdr_source_0.set_dc_offset_mode(0, 0)
         self.osmosdr_source_0.set_iq_balance_mode(0, 0)
         self.osmosdr_source_0.set_gain_mode(False, 0)
-        self.osmosdr_source_0.set_gain(10, 0)
+        self.osmosdr_source_0.set_gain(30, 0)
         self.osmosdr_source_0.set_if_gain(20, 0)
         self.osmosdr_source_0.set_bb_gain(20, 0)
         self.osmosdr_source_0.set_antenna('', 0)
         self.osmosdr_source_0.set_bandwidth(0, 0)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'C:\\Users\\admin\\Desktop\\RF-Fingerprint-Extraction-for-Bluetooth\\BluetoothSignal\\signal\\channal39_1', False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'D:\\RF-Fingerprint-Extraction-for-Bluetooth\\BluetoothSignal\\signal\\ble_channel39_01.dat', False)
         self.blocks_file_sink_0.set_unbuffered(False)
 
 

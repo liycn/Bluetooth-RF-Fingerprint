@@ -5,3 +5,6 @@ channel37_*
 
 # 不提交报告 
 report
+
+# 不提交数据
+*.dat
