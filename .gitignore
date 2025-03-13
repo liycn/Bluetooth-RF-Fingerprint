@@ -8,3 +8,5 @@ report
 
 # 不提交数据
 *.dat
+*.iq
+*.txt

@@ -88,7 +88,7 @@ blocks:
     alias: ''
     append: 'False'
     comment: ''
-    file: D:\RF-Fingerprint-Extraction-for-Bluetooth\BluetoothSignal\signal\ble_channel39_01.dat
+    file: D:\RF-Fingerprint-Extraction-for-Bluetooth\BluetoothSignal\signal\ble_channel39_01.iq
     type: complex
     unbuffered: 'False'
     vlen: '1'

@@ -176,7 +176,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.osmosdr_source_0.set_bb_gain(20, 0)
         self.osmosdr_source_0.set_antenna('', 0)
         self.osmosdr_source_0.set_bandwidth(0, 0)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'D:\\RF-Fingerprint-Extraction-for-Bluetooth\\BluetoothSignal\\signal\\ble_channel39_01.dat', False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'D:\\RF-Fingerprint-Extraction-for-Bluetooth\\BluetoothSignal\\signal\\ble_channel39_01.iq', False)
         self.blocks_file_sink_0.set_unbuffered(False)
 
 
