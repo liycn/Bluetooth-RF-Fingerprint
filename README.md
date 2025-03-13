@@ -30,12 +30,12 @@
 |~~编程语言~~|~~`Python` 3.8.5~~|废案|
 |编程语言|`Python` 3.8.5|作为模型训练的基础语言|
 |程序工具|`Jupyter Notebook` 6.1.4|用于模型训练的基础|
-|数据采集 硬件部分|`HackRF One` 2018.01.1 (API:1.02)|SDR 设备皆可。|
-|蓝牙信息采集工具|`BluetoothView` 1.70|主要用于收集指定设备的mac地址和信道|
-|~~数据采集 软件部分~~|~~`GNU Radio` 3.7.11~~|废案|
-|数据采集 软件部分|`GNU Radio` 3.10.10.0|软件 Python 版本 3.11.9|
-|~~GNU Radio-插件~~|~~gr-osmosdr~~|~~`sudo apt-get install gnuradio gr-osmosdr hackrf`~~ 貌似新版本不用自己单独下载。|
-|~~GNU Radio-插件~~|~~gr-bluetooth~~|~~[仓库地址](https://github.com/greatscottgadgets/gr-bluetooth)~~ 废案|
+|数据采集<br>硬件部分|`HackRF One` 2018.01.1 (API:1.02)|SDR 设备皆可。|
+|蓝牙<br>信息采集工具|`BluetoothView` 1.70|主要用于收集指定设备的mac地址和信道|
+|~~数据采集<br>软件部分~~|~~`GNU Radio` 3.7.11~~|废案|
+|数据采集<br>软件部分|`GNU Radio` 3.10.10.0|软件 Python 版本 3.11.9|
+|~~GNU Radio<br>插件~~|~~gr-osmosdr~~|~~`sudo apt-get install gnuradio gr-osmosdr hackrf`~~ <br>貌似新版本不用自己单独下载。|
+|~~GNU Radio<br>插件~~|~~gr-bluetooth~~|~~[仓库地址](https://github.com/greatscottgadgets/gr-bluetooth)~~ 废案|
 
 ### 📡 HankRF One
 
