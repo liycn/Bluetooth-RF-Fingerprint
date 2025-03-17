@@ -108,7 +108,7 @@ class BLE_Decode:
                     print ("    [ChSel] : "+self.PDU_CHSEL[self.output['ChSel']],end=' ')
                     print ("    [TxAdd] : "+self.PDU_Add[self.output['TxAdd']],end=' ')
                     print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
-                    print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
+                    print ("    [PDU] : " + str(self.output['pdu_payload']))
                 except:
                     pass
             else:
