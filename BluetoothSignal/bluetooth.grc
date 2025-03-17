@@ -73,7 +73,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '4000000'
+    value: 4e6
   states:
     bus_sink: false
     bus_source: false
@@ -96,7 +96,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 332.0]
+    coordinate: [504, 380.0]
     rotation: 0
     state: enabled
 - name: osmosdr_source_0
@@ -453,7 +453,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [104, 152.0]
+    coordinate: [144, 200.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -534,7 +534,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 120.0]
+    coordinate: [504, 168.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -631,7 +631,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 228.0]
+    coordinate: [504, 276.0]
     rotation: 0
     state: enabled
 
