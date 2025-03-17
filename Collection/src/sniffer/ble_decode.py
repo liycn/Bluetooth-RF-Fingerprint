@@ -24,7 +24,59 @@ import epy_block_1
 import epy_block_2
 import osmosdr
 import time
+import numpy as np
+import pmt
 
+class preamble_detector(gr.sync_block):
+    def __init__(self):
+        gr.sync_block.__init__(self,
+            name="preamble_detector",
+            in_sig=[np.complex64],
+            out_sig=[np.complex64])
+        self.preamble_samples = []
+        self.detection_threshold = 0.5
+        self.samples_per_symbol = 4
+        self.preamble_length = 8  # BLE前导码长度为8个符号
+        self.message_port_register_out(pmt.intern('msg_out'))
+        
+    def work(self, input_items, output_items):
+        in0 = input_items[0]
+        out = output_items[0]
+        
+        # 检测前导码
+        for i in range(len(in0)):
+            # 计算信号能量
+            energy = np.abs(in0[i])
+            
+            # 如果能量超过阈值，可能是前导码的开始
+            if energy > self.detection_threshold:
+                # 收集前导码样本
+                preamble_start = max(0, i - self.samples_per_symbol * self.preamble_length)
+                preamble_end = i + self.samples_per_symbol
+                self.preamble_samples = in0[preamble_start:preamble_end]
+                
+                # 输出前导码样本
+                if len(self.preamble_samples) > 0:
+                    # 创建包含前导码信息的字典
+                    preamble_info = {
+                        'Channel': 37,  # 默认通道
+                        'AA': '0x8E89BED6',  # 默认访问地址
+                        'preamble': str(self.preamble_samples),
+                        'type': '0000',  # 默认类型
+                        'ChSel': '0',
+                        'TxAdd': '0',
+                        'RxAdd': '0',
+                        'pdu_payload': '',
+                        'payload': '',
+                        'crc': '0'
+                    }
+                    
+                    # 将信息转换为PMT消息并发送
+                    msg = pmt.to_pmt(preamble_info)
+                    self.message_port_pub(pmt.intern('msg_out'), msg)
+                    
+        out[:] = in0
+        return len(out)
 
 class ble_decode(gr.top_block):
 
@@ -59,6 +111,13 @@ class ble_decode(gr.top_block):
         self.osmosdr_source_0.set_bb_gain(20, 0)
         self.osmosdr_source_0.set_antenna('', 0)
         self.osmosdr_source_0.set_bandwidth(2e6, 0)
+        
+        # 添加信号复制块
+        self.blocks_copy_0 = blocks.copy(gr.sizeof_gr_complex*1)
+        
+        # 添加前导码检测器
+        self.preamble_detector_0 = preamble_detector()
+        
         self.epy_block_2 = epy_block_2.blk(CHANNEL=channel_id, CRCINIT=crc_init, ADVADDRESS='')
         self.epy_block_1 = epy_block_1.blk(CHANNEL=channel_id)
         self.epy_block_0 = epy_block_0.blk(AA=access_address)
@@ -73,14 +132,19 @@ class ble_decode(gr.top_block):
             log=False)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
 
-
         ##################################################
         # Connections
         ##################################################
         self.msg_connect((self.epy_block_0, 'msg_out'), (self.epy_block_1, 'msg_in'))
         self.msg_connect((self.epy_block_1, 'msg_out'), (self.epy_block_2, 'msg_in'))
         self.msg_connect((self.epy_block_2, 'msg_out'), (self.zeromq_pub_msg_sink_0, 'in'))
-        self.connect((self.blocks_throttle_0, 0), (self.digital_gfsk_demod_0, 0))
+        # 添加前导码检测器的消息连接
+        self.msg_connect((self.preamble_detector_0, 'msg_out'), (self.zeromq_pub_msg_sink_0, 'in'))
+        
+        # 修改连接以添加前导码检测分支
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_copy_0, 0))
+        self.connect((self.blocks_copy_0, 0), (self.preamble_detector_0, 0))
+        self.connect((self.blocks_copy_0, 0), (self.digital_gfsk_demod_0, 0))
         self.connect((self.digital_gfsk_demod_0, 0), (self.epy_block_0, 0))
         self.connect((self.osmosdr_source_0, 0), (self.blocks_throttle_0, 0))
 

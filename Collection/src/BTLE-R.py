@@ -93,10 +93,14 @@ class BLE_Decode:
         LOG = True
         self.output=eval(message[3:].decode('utf-8'))
         if LOG == True:
-        #if self.PDU_Type[self.output['type']]=='CONNECT_IND':
-            #print ("PACKETS —> ["+packet_str+"]")
             print ('    [CH]:'+str(self.output['Channel']),end=' ')
             print ('    [AA]:0x'+self.output['AA'].upper(),end='')
+            
+            # 添加前导码信息的显示
+            if 'preamble' in self.output:
+                print("\n    [Preamble]:", end=' ')
+                print(self.output['preamble'])
+            
             if self.output['Channel'] in [37,38,39]:
                 """Advertising Physical Channel PDU"""      
                 try:
@@ -106,14 +110,12 @@ class BLE_Decode:
                     print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
                     print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
                 except:
-                    #print("Invaild PDU Header")
                     pass
             else:
                 """Data Physical Channel PDU"""
                 print("Data Physical Channel PDU")
             
             print ("    [PAYLOAD] : ["+self.output['payload']+"]",end='')
-            #print ("    [LEN : "+str(len),end='')
             print ("    , CRC : "+self.output['crc']+"]\n")
 
     '''
