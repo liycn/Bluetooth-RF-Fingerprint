@@ -386,7 +386,7 @@ blocks:
       \ # reverse bits\n\n    def crc24(self,octets,crcint):\n        INIT = crcint\n\
       \        POLY = 0x100065B\n        crc = INIT\n        for octet in octets:\
       \ # this is what the '*octets++' logic is effectively\n        # accomplishing\
-      \ in the C code.\n            crc ^= (octet << 16)\n            # Throw that
+      \ in the C code.\n            crc ^= (octet << 16)\n            # Throw that\
       \ ROL function away, because the C code **doesn't** actually\n            #\
       \ rotate left; it shifts left. It happens to throw away any bits that are\n\
       \            # shifted past the 32nd position, but that doesn't actulaly matter\

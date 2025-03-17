@@ -21,7 +21,7 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
         gr.sync_block.__init__(
             self,
             name='BLE PDU Decode',   # will show up in GRC
-            in_sig=[np.complex64, np.complex64],  # 添加前导码输入
+            in_sig=None,
             out_sig=None
         )
         self.message_port_register_in(pmt.intern('msg_in'))
@@ -32,8 +32,6 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
         self.channel = CHANNEL
         self.crcinit = CRCINIT
         self.advA = ADVADDRESS
-        self.preamble_signals = []
-        self.preamble_features = []
 
     def handle_msg(self,msg):
         self.output={'Channel':self.channel,'pdu_payload':{}}
@@ -54,6 +52,17 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
         except:
             print("[Warning] the type of CRCInit should be string,using 0x555555 Default")
             CRCInit=0x555555
+        '''
+        crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit) #crc_ca=self.PDU_CRC_CAL(packet_str[10:len*2+14])
+        if crc_ca !=int(self.output['crc'],base=16): # CRC Check
+            if DEBUG:
+                print("[LOG] Drop packets [CRC wrong]\n")
+            return 0
+        '''
+
+        '''
+        Parse
+        '''
 
         if self.channel in [37,38,39]:
             """Advertising Physical Channel PDU"""
@@ -64,23 +73,26 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
                 return False
             try:
                 if self.PDU_Type[self.output['type']] != 'CONNECT_IND':
-                    crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit)
-                    if crc_ca !=int(self.output['crc'],base=16):
+                    crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit) #crc_ca=self.PDU_CRC_CAL(packet_str[10:len*2+14])
+                    if crc_ca !=int(self.output['crc'],base=16): # CRC Check
                             if Debug:
                                 print("[LOG] Drop packets [CRC wrong]\n")
                             return False
+
                 else:
-                    crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit)
-                    if crc_ca !=int(self.output['crc'],base=16):
+                    crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit) #crc_ca=self.PDU_CRC_CAL(packet_str[10:len*2+14])
+                    if crc_ca !=int(self.output['crc'],base=16): # CRC Check
                             if Debug:
                                 print("[LOG] CONNECT_IND packets [CRC wrong]")
                             self.output['crc'] += '[Wrong]'
+                            #return 0
             except:
                 return False
-            self.ADV_Payload_Parse(self.output['type'],self.output['payload'])
+            self.ADV_Payload_Parse(self.output['type'],self.output['payload']) ## Parse Payload
             try:
                 if self.output['pdu_payload']['AdvA']!="": 
                     if self.advA.upper() !='' and self.advA.upper() != self.output['pdu_payload']['AdvA'].upper():
+                        #print("DROP")
                         return False
             except:
                 if self.advA.upper() !='':
@@ -89,10 +101,32 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
             """Data Physical Channel PDU"""
             print("Data Physical Channel PDU")
 
-        # 添加前导码特征到输出
-        if hasattr(self, 'preamble_features') and len(self.preamble_features) > 0:
-            self.output['preamble_features'] = self.preamble_features[-1]  # 使用最新的前导码特征
-
+        """LOG"""
+        if Debug == True:
+        #if self.PDU_Type[self.output['type']]=='CONNECT_IND':
+            print ("PACKETS —> ["+packet_str+"]")
+            print ('    [CH]:'+str(self.channel),end=' ')
+            print ('    [AA]:0x'+self.output['AA'].upper(),end='')
+            if self.channel in [37,38,39]:
+                """Advertising Physical Channel PDU"""      
+                try:
+                    print ("    [Type]  : "+self.PDU_Type[self.output['type']],end=' ')
+                    print ("    [ChSel] : "+self.PDU_CHSEL[self.output['ChSel']],end=' ')
+                    print ("    [TxAdd] : "+self.PDU_Add[self.output['TxAdd']],end=' ')
+                    print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
+                    print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
+                except:
+                    if Debug:
+                        print("Invaild PDU Header")
+                    return 0
+            else:
+                """Data Physical Channel PDU"""
+                print("Data Physical Channel PDU")
+            
+            print ("    [PAYLOAD] : ["+self.output['payload']+"]",end='')
+            print ("    [LEN : "+str(len),end='')
+            print ("    , CRC : "+self.output['crc']+"]\n")
+        
         self.message_port_pub(pmt.intern("msg_out"),pmt.intern(str(self.output)))
 
     '''
@@ -310,36 +344,3 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
     
     def reset_addr(self,addr):
         self.advA = addr
-
-    def work(self, input_items, output_items):
-        in0 = input_items[0]  # 原始信号
-        in1 = input_items[1]  # 前导码信号
-        out0 = output_items[0]
-
-        # 处理前导码信号
-        if len(in1) > 0:
-            # 保存前导码信号用于后续分析
-            self.preamble_signals.append(in1)
-            
-            # 可以在这里添加前导码特征提取
-            # 例如：计算前导码的幅度、相位等特征
-            preamble_features = self.extract_preamble_features(in1)
-            self.preamble_features.append(preamble_features)
-
-        # 原有的信号处理
-        out0[:] = in0
-        return len(out0)
-
-    def extract_preamble_features(self, preamble_signal):
-        features = {
-            'amplitude': np.abs(preamble_signal),
-            'phase': np.angle(preamble_signal),
-            'power': np.mean(np.abs(preamble_signal)**2)
-        }
-        return features
-
-    def get_preamble_signals(self):
-        return self.preamble_signals
-
-    def get_preamble_features(self):
-        return self.preamble_features

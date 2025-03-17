@@ -61,7 +61,7 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 4e6
+        self.samp_rate = samp_rate = 4000000
         self.Frequency = Frequency = 2.48e9
 
         ##################################################

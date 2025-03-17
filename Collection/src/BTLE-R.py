@@ -93,6 +93,8 @@ class BLE_Decode:
         LOG = True
         self.output=eval(message[3:].decode('utf-8'))
         if LOG == True:
+        #if self.PDU_Type[self.output['type']]=='CONNECT_IND':
+            #print ("PACKETS —> ["+packet_str+"]")
             print ('    [CH]:'+str(self.output['Channel']),end=' ')
             print ('    [AA]:0x'+self.output['AA'].upper(),end='')
             if self.output['Channel'] in [37,38,39]:
@@ -103,22 +105,15 @@ class BLE_Decode:
                     print ("    [TxAdd] : "+self.PDU_Add[self.output['TxAdd']],end=' ')
                     print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
                     print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
-                    
-                    # 输出前导码特征信息
-                    if 'preamble_features' in self.output:
-                        print("     |----- [Preamble Features]:")
-                        features = self.output['preamble_features']
-                        print(f"         Amplitude: {features['amplitude']}")
-                        print(f"         Phase: {features['phase']}")
-                        print(f"         Power: {features['power']}")
                 except:
+                    #print("Invaild PDU Header")
                     pass
             else:
                 """Data Physical Channel PDU"""
                 print("Data Physical Channel PDU")
             
             print ("    [PAYLOAD] : ["+self.output['payload']+"]",end='')
-            print ("    [LEN : "+str(len(self.output['payload'])),end='')
+            #print ("    [LEN : "+str(len),end='')
             print ("    , CRC : "+self.output['crc']+"]\n")
 
     '''

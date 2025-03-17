@@ -92,30 +92,3 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
 
     def reset_channel(self,channel):
         self.channel = channel
-
-class epy_block_1(gr.sync_block):
-    def __init__(self):
-        gr.sync_block.__init__(self,
-            name="epy_block_1",
-            in_sig=[np.complex64],
-            out_sig=[np.complex64, np.complex64])  # 添加第二个输出端口用于前导码
-
-    def work(self, input_items, output_items):
-        in0 = input_items[0]
-        out0 = output_items[0]
-        out1 = output_items[1]  # 前导码输出
-
-        # 检测前导码（10101010）
-        preamble_pattern = np.array([1, 0, 1, 0, 1, 0, 1, 0])
-        preamble_length = len(preamble_pattern)
-        
-        # 在输入信号中寻找前导码
-        for i in range(len(in0) - preamble_length):
-            if np.array_equal(in0[i:i+preamble_length], preamble_pattern):
-                # 提取前导码信号
-                out1[i:i+preamble_length] = in0[i:i+preamble_length]
-                break
-
-        # 原有的 GFSK 解调处理
-        out0[:] = in0
-        return len(out0)
