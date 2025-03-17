@@ -104,7 +104,7 @@ class BLE_Decode:
                     print ("    [ChSel] : "+self.PDU_CHSEL[self.output['ChSel']],end=' ')
                     print ("    [TxAdd] : "+self.PDU_Add[self.output['TxAdd']],end=' ')
                     print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
-                    print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
+                    print ("    [PDU] : " + str(self.output['pdu_payload']))
                 except:
                     #print("Invaild PDU Header")
                     pass
@@ -114,7 +114,7 @@ class BLE_Decode:
             
             print ("    [PAYLOAD] : ["+self.output['payload']+"]",end='')
             #print ("    [LEN : "+str(len),end='')
-            print ("    , CRC : "+self.output['crc']+"]\n")
+            print ("    , [CRC] : ["+self.output['crc']+"]\n")
 
     '''
     PDU Help Dict
