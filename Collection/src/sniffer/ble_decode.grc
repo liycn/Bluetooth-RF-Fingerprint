@@ -215,48 +215,7 @@ blocks:
   id: epy_block
   parameters:
     CHANNEL: channel_id
-    _source_code: "\"\"\"\nWhiltening/De-Whitening Blocks:\n\nInverse whitening of\
-      \ BLE data packets, so that we can parse the PDU format of the link layer then.\n\
-      \nInput data: Message data from BLE_Packets_Gain module\n\"\"\"\n\nimport numpy\
-      \ as np\nfrom gnuradio import gr\nimport pmt\nimport time\n\nclass blk(gr.sync_block):\
-      \  # other base classes are basic_block, decim_block, interp_block\n    \"\"\
-      \"Whiltening Blocks\"\"\"\n\n    def __init__(self, CHANNEL=37):  # only default\
-      \ arguments here\n        \"\"\"arguments to this function show up as parameters\
-      \ in GRC\"\"\"\n        gr.sync_block.__init__(\n            self,\n       \
-      \     name='Whiltening',   # will show up in GRC\n            in_sig=None,\n\
-      \            out_sig=None\n        )\n        self.message_port_register_in(pmt.intern('msg_in'))\n\
-      \        self.set_msg_handler(pmt.intern('msg_in'), self.handle_msg)\n     \
-      \   self.message_port_register_out(pmt.intern('msg_out'))\n        # if an attribute\
-      \ with the same name as a parameter is found,\n        # a callback is registered\
-      \ (properties work, too).\n        self.channel = CHANNEL\n        self.packets_pool=[]\n\
-      \n    def handle_msg(self,msg):\n        packets=pmt.symbol_to_string(msg)\n\
-      \        #'''\n        if packets[:200] in self.packets_pool:\n            #print(packets[:200])\n\
-      \            self.packets_pool.append('Empty PDU')\n            if len(self.packets_pool)\
-      \ > 3: #5\n                self.packets_pool=[]\n                #print(\"clear\"\
-      )\n            #print(\"pass\")\n            return 0\n        #'''     \n \
-      \       self.packets_pool.append(packets[:200])\n        index=0\n        packets_after\
-      \ = self.whitening(self.channel,packets)\n        self.message_port_pub(pmt.intern(\"\
-      msg_out\"),pmt.intern(packets_after))\n        \"\"\"\n        print(\"[Before\
-      \ Whitening]:\",end='')\n        self.logger(packets)\n        print(\"[After\
-      \   Whitening]:\",end='')\n        self.logger(packets_after)\n        \"\"\"\
-      \n        time.sleep(0.01)\n        \n\n    def whitening(self,channel,data):\n\
-      \        pre = data[:40]\n        data= data[40:]\n        position=[]\n   \
-      \     register=bin(channel)[2:].zfill(6)\n        #print(register)\n       \
-      \ position.append(1)\n        for i in register:\n            position.append(int(i))\n\
-      \        #print(\"init position:\"+\"\".join([str(x) for x in position]))\n\n\
-      \        sink=[]\n        for x in data:\n            extra = position[6]\n\
-      \            sink.append(extra^int(x))\n            position[6]=position[5]\n\
-      \            position[5]=position[4]\n            position[4]=position[3]^extra\n\
-      \            position[3]=position[2]\n            position[2]=position[1]\n\
-      \            position[1]=position[0]\n            position[0]=extra\n      \
-      \  return pre+\"\".join([str(x) for x in sink])\n\n    def logger(self,data):\n\
-      \        index=0\n        print(\"[\",end='')\n        for i in range(int(len(data)/8)):\n\
-      \                    Bytes=[data[x] for x in range(index,index+4)]\n       \
-      \             Bytes2=[data[x] for x in range(index+4,index+8)]\n           \
-      \         print(format(int(\"\".join(Bytes2[::-1]),2),'x')+format(int(\"\".join(Bytes[::-1]),2),'x'),end='')\
-      \ # Bits need reverse\n                    #print(\"0x\"+format(int(\"\".join(Bytes),2),'x')+format(int(\"\
-      \".join(Bytes2),2),'x'),end=' ') \n                    index+=8\n        print(\"\
-      ]\")\n\n    def reset_channel(self,channel):\n        self.channel = channel"
+    _source_code: "\"\"\"\nWhiltening/De-Whitening Blocks:\n\nInverse whitening of BLE data packets, so that we can parse the PDU format of the link layer then.\n\nInput data: Message data from BLE_Packets_Gain module\n\"\"\"\n\nimport numpy as np\nfrom gnuradio import gr\nimport pmt\nimport time\n\nclass blk(gr.sync_block):  # other base classes are basic_block, decim_block, interp_block\n    \"\"\"Whiltening Blocks\"\"\"\n\n    def __init__(self, CHANNEL=37):  # only default arguments here\n        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n            self,\n            name='Whiltening',   # will show up in GRC\n            in_sig=None,\n            out_sig=None\n        )\n        self.message_port_register_in(pmt.intern('msg_in'))\n        self.set_msg_handler(pmt.intern('msg_in'), self.handle_msg)\n        self.message_port_register_out(pmt.intern('msg_out'))\n        # if an attribute with the same name as a parameter is found,\n        # a callback is registered (properties work, too).\n        self.channel = CHANNEL\n        self.packets_pool=[]\n\n    def handle_msg(self,msg):\n        if pmt.is_dict(msg):\n            # 处理新格式（包含前导码）\n            preamble = pmt.symbol_to_string(pmt.dict_ref(msg, pmt.intern(\"preamble\"), pmt.PMT_NIL))\n            packets = pmt.symbol_to_string(pmt.dict_ref(msg, pmt.intern(\"packets\"), pmt.PMT_NIL))\n        else:\n            # 处理旧格式\n            packets = pmt.symbol_to_string(msg)\n            preamble = None\n            \n        #'''\n        if packets[:200] in self.packets_pool:\n            self.packets_pool.append('Empty PDU')\n            if len(self.packets_pool) > 3: #5\n                self.packets_pool=[]\n        #'''     \n        self.packets_pool.append(packets[:200])\n        index=0\n        packets_after = self.whitening(self.channel,packets)\n        \n        # 构建输出字典\n        msg_dict = pmt.make_dict()\n        if preamble is not None:\n            msg_dict = pmt.dict_add(msg_dict, pmt.intern(\"preamble\"), pmt.intern(preamble))\n        msg_dict = pmt.dict_add(msg_dict, pmt.intern(\"packets\"), pmt.intern(packets_after))\n        \n        self.message_port_pub(pmt.intern(\"msg_out\"), msg_dict)\n        time.sleep(0.01)\n        \n\n    def whitening(self,channel,data):\n        pre = data[:40]\n        data= data[40:]\n        position=[]\n        register=bin(channel)[2:].zfill(6)\n        #print(register)\n        position.append(1)\n        for i in register:\n            position.append(int(i))\n        #print(\"init position:\"+\"\".join([str(x) for x in position]))\n\n        sink=[]\n        for x in data:\n            extra = position[6]\n            sink.append(extra^int(x))\n            position[6]=position[5]\n            position[5]=position[4]\n            position[4]=position[3]^extra\n            position[3]=position[2]\n            position[2]=position[1]\n            position[1]=position[0]\n            position[0]=extra\n        return pre+\"\".join([str(x) for x in sink])\n\n    def logger(self,data):\n        index=0\n        print(\"[\",end='')\n        for i in range(int(len(data)/8)):\n                    Bytes=[data[x] for x in range(index,index+4)]\n                    Bytes2=[data[x] for x in range(index+4,index+8)]\n                    print(format(int(\"\".join(Bytes2[::-1]),2),'x')+format(int(\"\".join(Bytes[::-1]),2),'x'),end='') # Bits need reverse\n                    #print(\"0x\"+format(int(\"\".join(Bytes),2),'x')+format(int(\"\".join(Bytes2),2),'x'),end=' ') \n                    index+=8\n        print(\"]\")\n\n    def reset_channel(self,channel):\n        self.channel = channel"
     affinity: ''
     alias: ''
     comment: ''
@@ -335,8 +294,8 @@ blocks:
       \ Physical Channel PDU\"\"\"      \n                try:\n                 \
       \   print (\"    [Type]  : \"+self.PDU_Type[self.output['type']],end=' ')\n\
       \                    print (\"    [ChSel] : \"+self.PDU_CHSEL[self.output['ChSel']],end='\
-      \ ')\n                    print (\"    [TxAdd] : \"+self.PDU_Add[self.output['TxAdd']],end='\
-      \ ')\n                    print (\"    [RxAdd] : \"+self.PDU_Add[self.output['RxAdd']])\n\
+      ')\n                    print (\"    [TxAdd] : \"+self.PDU_Add[self.output['TxAdd']],end='\
+      ')\n                    print (\"    [RxAdd] : \"+self.PDU_Add[self.output['RxAdd']])\n\
       \                    print (\"     |----- [PDU] : \" + str(self.output['pdu_payload']))\n\
       \                except:\n                    if Debug:\n                  \
       \      print(\"Invaild PDU Header\")\n                    return 0\n       \
@@ -386,7 +345,7 @@ blocks:
       \ # reverse bits\n\n    def crc24(self,octets,crcint):\n        INIT = crcint\n\
       \        POLY = 0x100065B\n        crc = INIT\n        for octet in octets:\
       \ # this is what the '*octets++' logic is effectively\n        # accomplishing\
-      \ in the C code.\n            crc ^= (octet << 16)\n            # Throw that\
+      \ in the C code.\n            crc ^= (octet << 16)\n            # Throw that
       \ ROL function away, because the C code **doesn't** actually\n            #\
       \ rotate left; it shifts left. It happens to throw away any bits that are\n\
       \            # shifted past the 32nd position, but that doesn't actulaly matter\
@@ -835,9 +794,26 @@ blocks:
     coordinate: [872, 340.0]
     rotation: 0
     state: true
+- name: preamble_extractor_0
+  id: preamble_extractor
+  parameters:
+    _source_code: "from preamble_extractor import preamble_extractor\n\nclass blk(preamble_extractor):\n    def __init__(self):\n        preamble_extractor.__init__(self)"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 244.0]
+    rotation: 0
+    state: true
 
 connections:
-- [blocks_throttle_0, '0', digital_gfsk_demod_0, '0']
+- [blocks_throttle_0, '0', preamble_extractor_0, '0']
+- [preamble_extractor_0, '0', digital_gfsk_demod_0, '0']
 - [digital_gfsk_demod_0, '0', epy_block_0, '0']
 - [epy_block_0, msg_out, epy_block_1, msg_in]
 - [epy_block_1, msg_out, epy_block_2, msg_in]

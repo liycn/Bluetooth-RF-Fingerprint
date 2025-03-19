@@ -34,100 +34,23 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
         self.advA = ADVADDRESS
 
     def handle_msg(self,msg):
-        self.output={'Channel':self.channel,'pdu_payload':{}}
-
-        packets=pmt.symbol_to_string(msg)
-        packet_str = self.bit2str(packets) # Convert the bitstream to a string, modify the bits order
-        
-        len = self.PDU_Len(packet_str)
-        packet_str = packet_str[:len*2+20] # minus the excess at the end
-
-        # Start Parse PDU
-        self.AA_Gain(packet_str)
-        self.PDU_Payload(packet_str)
-        self.PDU_CRC(packet_str)
-
-        try:
-            CRCInit=int(self.crcinit,base=16)
-        except:
-            print("[Warning] the type of CRCInit should be string,using 0x555555 Default")
-            CRCInit=0x555555
-        '''
-        crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit) #crc_ca=self.PDU_CRC_CAL(packet_str[10:len*2+14])
-        if crc_ca !=int(self.output['crc'],base=16): # CRC Check
-            if DEBUG:
-                print("[LOG] Drop packets [CRC wrong]\n")
-            return 0
-        '''
-
-        '''
-        Parse
-        '''
-
-        if self.channel in [37,38,39]:
-            """Advertising Physical Channel PDU"""
-            try:
-                self.ADV_HEAD_Parse(packet_str) ## Parse Header
-            except:
-                print("PDU Header Parsing Error")
-                return False
-            try:
-                if self.PDU_Type[self.output['type']] != 'CONNECT_IND':
-                    crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit) #crc_ca=self.PDU_CRC_CAL(packet_str[10:len*2+14])
-                    if crc_ca !=int(self.output['crc'],base=16): # CRC Check
-                            if Debug:
-                                print("[LOG] Drop packets [CRC wrong]\n")
-                            return False
-
-                else:
-                    crc_ca=self.PDU_CRC_CAL(self.output['head']+self.output['payload'],crcinit=CRCInit) #crc_ca=self.PDU_CRC_CAL(packet_str[10:len*2+14])
-                    if crc_ca !=int(self.output['crc'],base=16): # CRC Check
-                            if Debug:
-                                print("[LOG] CONNECT_IND packets [CRC wrong]")
-                            self.output['crc'] += '[Wrong]'
-                            #return 0
-            except:
-                return False
-            self.ADV_Payload_Parse(self.output['type'],self.output['payload']) ## Parse Payload
-            try:
-                if self.output['pdu_payload']['AdvA']!="": 
-                    if self.advA.upper() !='' and self.advA.upper() != self.output['pdu_payload']['AdvA'].upper():
-                        #print("DROP")
-                        return False
-            except:
-                if self.advA.upper() !='':
-                    return False
+        if pmt.is_dict(msg):
+            # 处理新格式（包含前导码）
+            preamble = pmt.symbol_to_string(pmt.dict_ref(msg, pmt.intern("preamble"), pmt.PMT_NIL))
+            packets = pmt.symbol_to_string(pmt.dict_ref(msg, pmt.intern("packets"), pmt.PMT_NIL))
         else:
-            """Data Physical Channel PDU"""
-            print("Data Physical Channel PDU")
-
-        """LOG"""
-        if Debug == True:
-        #if self.PDU_Type[self.output['type']]=='CONNECT_IND':
-            print ("PACKETS —> ["+packet_str+"]")
-            print ('    [CH]:'+str(self.channel),end=' ')
-            print ('    [AA]:0x'+self.output['AA'].upper(),end='')
-            if self.channel in [37,38,39]:
-                """Advertising Physical Channel PDU"""      
-                try:
-                    print ("    [Type]  : "+self.PDU_Type[self.output['type']],end=' ')
-                    print ("    [ChSel] : "+self.PDU_CHSEL[self.output['ChSel']],end=' ')
-                    print ("    [TxAdd] : "+self.PDU_Add[self.output['TxAdd']],end=' ')
-                    print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
-                    print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
-                except:
-                    if Debug:
-                        print("Invaild PDU Header")
-                    return 0
-            else:
-                """Data Physical Channel PDU"""
-                print("Data Physical Channel PDU")
+            # 处理旧格式
+            packets = pmt.symbol_to_string(msg)
+            preamble = None
             
-            print ("    [PAYLOAD] : ["+self.output['payload']+"]",end='')
-            print ("    [LEN : "+str(len),end='')
-            print ("    , CRC : "+self.output['crc']+"]\n")
+        # 构建输出字典
+        msg_dict = pmt.make_dict()
+        if preamble is not None:
+            msg_dict = pmt.dict_add(msg_dict, pmt.intern("preamble"), pmt.intern(preamble))
+        msg_dict = pmt.dict_add(msg_dict, pmt.intern("packets"), pmt.intern(packets))
         
-        self.message_port_pub(pmt.intern("msg_out"),pmt.intern(str(self.output)))
+        self.message_port_pub(pmt.intern("msg_out"), msg_dict)
+        time.sleep(0.01)
 
     '''
     PDU Help Dict

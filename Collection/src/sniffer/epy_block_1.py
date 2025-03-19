@@ -31,27 +31,32 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
         self.packets_pool=[]
 
     def handle_msg(self,msg):
-        packets=pmt.symbol_to_string(msg)
-        #'''
+        if pmt.is_dict(msg):
+            # 处理新格式（包含前导码）
+            preamble = pmt.symbol_to_string(pmt.dict_ref(msg, pmt.intern("preamble"), pmt.PMT_NIL))
+            packets = pmt.symbol_to_string(pmt.dict_ref(msg, pmt.intern("packets"), pmt.PMT_NIL))
+        else:
+            # 处理旧格式
+            packets = pmt.symbol_to_string(msg)
+            preamble = None
+            
+        #''' 
         if packets[:200] in self.packets_pool:
-            #print(packets[:200])
             self.packets_pool.append('Empty PDU')
             if len(self.packets_pool) > 3: #5
                 self.packets_pool=[]
-                #print("clear")
-            #print("pass")
-            return 0
         #'''     
         self.packets_pool.append(packets[:200])
         index=0
         packets_after = self.whitening(self.channel,packets)
-        self.message_port_pub(pmt.intern("msg_out"),pmt.intern(packets_after))
-        """
-        print("[Before Whitening]:",end='')
-        self.logger(packets)
-        print("[After   Whitening]:",end='')
-        self.logger(packets_after)
-        """
+        
+        # 构建输出字典
+        msg_dict = pmt.make_dict()
+        if preamble is not None:
+            msg_dict = pmt.dict_add(msg_dict, pmt.intern("preamble"), pmt.intern(preamble))
+        msg_dict = pmt.dict_add(msg_dict, pmt.intern("packets"), pmt.intern(packets_after))
+        
+        self.message_port_pub(pmt.intern("msg_out"), msg_dict)
         time.sleep(0.01)
         
 

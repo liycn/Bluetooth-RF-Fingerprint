@@ -48,7 +48,6 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
 
         # Fix packets cut
         if len(self.packets_buf)!=0:
-            #print("fix packets")
             self.packets_buf += bits_decode[:Octets-len(self.packets_buf)]
             self.message_port_pub(pmt.intern("msg_out"),pmt.intern(self.packets_buf))
             self.packets_buf = ""
@@ -60,63 +59,30 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
             AA=""
         PREAMBLE="01010101" # 0xaa reverse
         PREAMBLE2="10101010" # 0x55 reverse
-        #AA = "01101011011111011001000101110001" #Access Address = 0x8E89BED6
         
         packet1 = PREAMBLE+AA
         packet2 = PREAMBLE2+AA
 
-        if packet1 in bits_decode or packet2 in bits_decode :
+        if packet1 in bits_decode or packet2 in bits_decode:
             if packet1 in bits_decode:
                 index = bits_decode.find(packet1)
+                preamble = PREAMBLE
             else:
                 index = bits_decode.find(packet2)
+                preamble = PREAMBLE2
             
             if len(bits_decode) - index >= Octets*8:    # Cut pakcets
                 packets = bits_decode[index:index+Octets*8]
+                # 使用pmt.dict()创建消息
+                msg_dict = pmt.make_dict()
+                msg_dict = pmt.dict_add(msg_dict, pmt.intern("preamble"), pmt.intern(preamble))
+                msg_dict = pmt.dict_add(msg_dict, pmt.intern("packets"), pmt.intern(packets))
+                self.message_port_pub(pmt.intern("msg_out"), msg_dict)
             else:
                 self.packets_buf = bits_decode[index:] # Fix packets
                 return len(input_items[0])   
-            
-            '''
-            if packets[(Octets-3)*8:] == self.last_packets:  # Deduplication according to CRCs
-                return len(input_items[0]) 
-            else:
-                self.last_packets=packets[(Octets-3)*8:]
-            '''
-            if True:
-                # Debug Log
-                '''
-                print("\n[",end='')
-                index=0
-                for i in range(0,47):
-                    Bytes=[packets[x] for x in range(index,index+4)]
-                    Bytes2=[packets[x] for x in range(index+4,index+8)]
-                    print("0x"+format(int("".join(Bytes2[::-1]),2),'x')+format(int("".join(Bytes[::-1]),2),'x'),end=' ') # Bits need reverse
-                    index+=8                
-                print("]")
-                '''
-                self.message_port_pub(pmt.intern("msg_out"),pmt.intern(packets))
-                return len(input_items[0])
-        '''
-        
-        if packet2 in bits_decode:
-            index = bits_decode.find(packet2)
-            print("[",end='')
-            for i in range(0,47):
-                try:
-                    Bytes=[bits_decode[x] for x in range(index,index+4)]
-                    Bytes2=[bits_decode[x] for x in range(index+4,index+8)]
-                    print("0x"+format(int("".join(Bytes2[::-1]),2),'x')+format(int("".join(Bytes[::-1]),2),'x'),end=' ') # Bits need reverse
-                except:
-                    print("decode fail")
-                    break    
-                index+=8
-            print("]")
-        
-        '''
+
         return len(input_items[0])
-        #return len(output_items[0])
-        #output_items[0][:] = input_items[0] * self.example_param
 
     def reset_accaddr(self,aa):
         self.AccessAddress = aa

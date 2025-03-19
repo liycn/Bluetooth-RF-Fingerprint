@@ -96,10 +96,9 @@ class BLE_Decode:
             print ('    [CH]:'+str(self.output['Channel']),end=' ')
             print ('    [AA]:0x'+self.output['AA'].upper(),end='')
             
-            # 添加前导码信息的显示
+            # 添加前导码输出
             if 'preamble' in self.output:
-                print("\n    [Preamble]:", end=' ')
-                print(self.output['preamble'])
+                print("    [Preamble]: " + self.output['preamble'], end='')
             
             if self.output['Channel'] in [37,38,39]:
                 """Advertising Physical Channel PDU"""      
@@ -108,14 +107,16 @@ class BLE_Decode:
                     print ("    [ChSel] : "+self.PDU_CHSEL[self.output['ChSel']],end=' ')
                     print ("    [TxAdd] : "+self.PDU_Add[self.output['TxAdd']],end=' ')
                     print ("    [RxAdd] : "+self.PDU_Add[self.output['RxAdd']])
-                    print ("    [PDU] : " + str(self.output['pdu_payload']))
+                    print ("     |----- [PDU] : " + str(self.output['pdu_payload']))
                 except:
+                    #print("Invaild PDU Header")
                     pass
             else:
                 """Data Physical Channel PDU"""
                 print("Data Physical Channel PDU")
             
             print ("    [PAYLOAD] : ["+self.output['payload']+"]",end='')
+            #print ("    [LEN : "+str(len),end='')
             print ("    , CRC : "+self.output['crc']+"]\n")
 
     '''
