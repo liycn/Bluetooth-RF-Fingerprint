@@ -24,6 +24,8 @@ import epy_block_1
 import epy_block_2
 import osmosdr
 import time
+import os
+from datetime import datetime
 
 
 class ble_decode(gr.top_block):
@@ -39,6 +41,15 @@ class ble_decode(gr.top_block):
         self.crc_init = crc_init = '0x555555'
         self.channel_id = channel_id = 37
         self.access_address = access_address = '0x8E89BED6'
+
+        # 创建数据保存目录
+        self.data_dir = '/home/ubuntu/Bluetooth-RF-Fingerprint/Collection/data'
+        if not os.path.exists(self.data_dir):
+            os.makedirs(self.data_dir)
+
+        # 生成文件名（包含时间戳和通道信息）
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.iq_filename = os.path.join(self.data_dir, f'iq_data_ch{channel_id}_{timestamp}.iq')
 
         ##################################################
         # Blocks
@@ -59,6 +70,11 @@ class ble_decode(gr.top_block):
         self.osmosdr_source_0.set_bb_gain(20, 0)
         self.osmosdr_source_0.set_antenna('', 0)
         self.osmosdr_source_0.set_bandwidth(2e6, 0)
+
+        # 添加文件保存块
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, self.iq_filename, False)
+        self.blocks_file_sink_0.set_unbuffered(False)
+
         self.epy_block_2 = epy_block_2.blk(CHANNEL=channel_id, CRCINIT=crc_init, ADVADDRESS='')
         self.epy_block_1 = epy_block_1.blk(CHANNEL=channel_id)
         self.epy_block_0 = epy_block_0.blk(AA=access_address)
@@ -83,7 +99,10 @@ class ble_decode(gr.top_block):
         self.connect((self.blocks_throttle_0, 0), (self.digital_gfsk_demod_0, 0))
         self.connect((self.digital_gfsk_demod_0, 0), (self.epy_block_0, 0))
         self.connect((self.osmosdr_source_0, 0), (self.blocks_throttle_0, 0))
+        # 添加文件保存连接
+        self.connect((self.osmosdr_source_0, 0), (self.blocks_file_sink_0, 0))
 
+        print(f"正在保存IQ数据到: {self.iq_filename}")
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -111,15 +130,11 @@ class ble_decode(gr.top_block):
 
     def set_channel_id(self, channel_id):
         self.channel_id = channel_id
-
-    def get_access_address(self):
-        return self.access_address
-
-    def set_access_address(self, access_address):
-        self.access_address = access_address
-
-
-
+        # 更新文件名以反映新的通道
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.iq_filename = os.path.join(self.data_dir, f'iq_data_ch{channel_id}_{timestamp}.iq')
+        self.blocks_file_sink_0.open(self.iq_filename)
+        print(f"切换到新通道，正在保存IQ数据到: {self.iq_filename}")
 
 
 def main(top_block_cls=ble_decode, options=None):
