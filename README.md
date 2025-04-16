@@ -1,7 +1,6 @@
 <img src="./README/CQU-EIE.svg">
 <h1 align="center">车载蓝牙设备的射频指纹提取技术设计与实现</h1>
 
----
 
 <!-- ## 🎈 项目概述
 
