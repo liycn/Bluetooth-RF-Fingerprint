@@ -1,0 +1,12 @@
+# python 3.10.16
+numpy
+pandas
+matplotlib
+scikit-learn
+xgboost
+catboost
+optuna
+ipykernel
+lightgbm
+seaborn
+torch
