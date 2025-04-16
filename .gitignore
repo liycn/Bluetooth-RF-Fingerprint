@@ -1,12 +1,9 @@
-# 三个信道的数据不上传，太大了
-channel39_*
-channel38_*
-channel37_*
+# 不提交数据集和数据集的预处理结果
+preprocessed/*
+dataset/*
 
-# 不提交报告 
-report
+# 不提交训练图片
+model/img/*
 
-# 不提交数据
-*.dat
-*.iq
-*.txt
+# 不提交模型
+model/model_save/*
