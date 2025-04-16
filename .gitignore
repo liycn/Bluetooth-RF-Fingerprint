@@ -7,3 +7,6 @@ model/img/*
 
 # 不提交模型
 model/model_save/*
+
+# 不提交GNU Radio的内容
+BluetoothSignal/*
