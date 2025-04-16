@@ -1,6 +1,6 @@
 <img src="./README/CQU-EIE.svg">
 <h1 align="center">车载蓝牙设备的射频指纹提取技术设计与实现</h1>
-<h2 align="center">Design and Implementation of RF Fingerprint Extraction Technology for In-Car Bluetooth Devices</h2>
+<h2 align="center">Design and Implementation of RF Fingerprint<br>Extraction Technology for In-Car Bluetooth Devices</h2>
 
 
 <!-- ## 🎈 项目概述
