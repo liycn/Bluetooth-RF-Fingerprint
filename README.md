@@ -3,14 +3,37 @@
 <h2 align="center">Design and Implementation of RF Fingerprint<br>Extraction Technology for In-Car Bluetooth Devices</h2>
 
 
-<!-- ## 🎈 项目概述
+## 🎈 项目
 
-本项目是我在重大卓工的**本科毕业设计**。
+**基础环境**：`Windows 11 专业工作站版 24H2` 、 `Anaconda3 2020.11(Python 3.8.5 64-bit)` 
 
-项目主要是提取低功耗蓝牙（BLE）设备的射频指纹，旨在通过研究和开发提取射频指纹。
+1. 进入项目模型的目录
 
+    ```bash
+    cd .\model\
+    ```
 
+2. 然后创建项目的 `conda` 环境
 
-全部推翻，因为发现之前研究方向有问题，现在逐步走向正轨了 -->
+    ```bash
+    conda env create -n bt python=3.10.16
+    ```
 
-<!-- - **python** 用于后续的信号处理和特征提取。 -->
+3. 激活环境
+
+    ```bash
+    conda activate bt
+    ```
+
+4. 更换 `pip` 源
+
+    ```bash
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+    ```
+
+5. 下载项目所有包
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
