@@ -1,37 +1,35 @@
 <img src="./README/CQU-EIE.svg">
-<h1 align="center">Design and Implementation of RF Fingerprint Extraction Technology for In-Car Bluetooth Devices</h1>
+<h1 align="center">车载蓝牙设备的射频指纹提取技术设计与实现</h1>
 
-**Read this in other languages: [English](README.md), [中文](README_zh.md)**
+## 🎈 项目
 
-## 🎈 Project
+**基础环境**：`Windows 11 专业工作站版 24H2` 、 `Anaconda3 2020.11(Python 3.8.5 64-bit)` 
 
-**Basic environment**: `Windows 11 Professional Workstation Edition 24H2`, `Anaconda3 2020.11 (Python 3.8.5 64-bit)`
-
-1. Enter the directory of the project model
+1. 进入项目模型的目录
 
     ```bash
     cd .\model\
     ```
 
-2. Then create the `conda` environment of the project
+2. 然后创建项目的 `conda` 环境
 
     ```bash
     conda env create -n bt python=3.10.16
     ```
 
-3. Activate the environment
+3. 激活环境
 
     ```bash
     conda activate bt
     ```
 
-4. Change the `pip` source
+4. 更换 `pip` 源
 
     ```bash
     pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
     ```
 
-5. Download all project packages
+5. 下载项目所有包
 
     ```bash
     pip install -r requirements.txt
