@@ -3,7 +3,7 @@ preprocessed/*
 dataset/*
 
 # 不提交训练图片
-model/img/*
+model/imgs/*
 
 # 不提交模型
 model/model_save/*
