@@ -39,14 +39,8 @@
 
 |序号|流程|对应文件|
 |:-|:-|:-|
-|1|数据采集||
+|1|数据采集|这个部分就用 GNU Radio + HackRF One实现的|
 |2|特征提取|[`model/utility.py`](./model/utility.py) 核心处理函数<br> [`model/getFeature.ipynb`](./model/getFeature.ipynb) 特征提取<br> |
 |3|特征选择|[`model/feature_selection.ipynb`](./model/feature_selection.ipynb) 选择最优特征|
 |4|模型训练|**[`model/network.py`](./model/network.py) 复数卷积神经网络的网络结构**<br> [`model/complexCNN_snr.ipynb`](./model/complexCNN_snr.ipynb) 基于信噪比的复数CNN模型训练<br> [`model/complexCNN_sym.ipynb`](./model/complexCNN_sym.ipynb) 基于号长度的复数CNN模型训练<br> [`model/xgboost_snr.ipynb`](./model/xgboost_snr.ipynb) 基于信噪比的XGBoost模型训练<br> [`model/xgboost_sym.ipynb`](./model/xgboost_sym.ipynb) 基于符号长度的XGBoost模型训练<br> [`model/xgboost_alg_snr.ipynb`](./model/xgboost_alg_snr.ipynb) 改进的XGBoost模型训练（信噪比）<br> [`model/xgboost_alg_sym.ipynb`](./model/xgboost_alg_sym.ipynb) 改进的XGBoost模型训练（符号长度）<br> |
 |5|模型评估||
-
-### 可视化分析
-
-- `constellation.ipynb`：分析信号的星座图
-
-- `test.py`：分析不同因素对星座图的影响
