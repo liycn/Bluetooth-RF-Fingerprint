@@ -5,6 +5,10 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, accuracy_score
+from tqdm import tqdm
 
 # 复数张量的表示：原通道数为n，则将通道数分为2n，前n表示实部，后n表示虚部。
 
@@ -250,3 +254,113 @@ def create_dataloaders(features_train, labels_train, features_test, labels_test,
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     
     return train_loader, test_loader, (scaler_real, scaler_imag) 
+
+def train_and_evaluate(model, train_loader, test_loader, device, num_epochs=30):
+    """训练模型并记录训练过程中的准确率"""
+    # 定义损失函数和优化器
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    
+    # 记录训练和测试准确率
+    train_accuracies = []
+    test_accuracies = []
+    
+    # 训练循环
+    for epoch in range(num_epochs):
+        print(f'第 {epoch+1}/{num_epochs} 轮,')
+        # 训练
+        model.train()
+        train_loss = 0
+        correct = 0
+        total = 0
+        
+        for inputs, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Train]"):
+            inputs, labels = inputs.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            train_loss += loss.item()
+            _, predicted = outputs.max(1)
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+        
+        train_acc = 100. * correct / total
+        train_accuracies.append(train_acc)
+        print(f'♂️ trainLoss: {train_loss/len(train_loader):.4f}, trainAcc: {train_acc:.2f}%')
+        
+        # 验证
+        model.eval()
+        test_loss = 0
+        correct = 0
+        total = 0
+        
+        with torch.no_grad():
+            for inputs, labels in tqdm(test_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Test]"):
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                
+                test_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+        
+        test_acc = 100. * correct / total
+        test_accuracies.append(test_acc)
+        print(f'♀️ testLoss: {test_loss/len(test_loader):.4f}, testAcc: {test_acc:.2f}%')
+    
+    return train_accuracies, test_accuracies
+
+def get_predictions(model, data_loader, device):
+    """获取模型在给定数据上的预测结果"""
+    model.eval()
+    all_predictions = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for inputs, labels in tqdm(data_loader, desc="获取预测结果"):
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            _, predicted = outputs.max(1)
+            
+            all_predictions.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+    
+    return np.array(all_predictions), np.array(all_labels)
+
+def plot_confusion_matrix(y_true, y_pred, class_names):
+    """绘制混淆矩阵"""
+    cm = confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
+    plt.xlabel('预测标签')
+    plt.ylabel('真实标签')
+    plt.title('混淆矩阵')
+    plt.tight_layout()
+    plt.savefig('confusion_matrix.png', dpi=300)
+    plt.show()
+    
+    # 计算每个类别的精确率和召回率
+    print("精确率和召回率:")
+    for i, class_name in enumerate(class_names):
+        precision = cm[i, i] / cm[:, i].sum() if cm[:, i].sum() != 0 else 0
+        recall = cm[i, i] / cm[i, :].sum() if cm[i, :].sum() != 0 else 0
+        print(f"{class_name} - 精确率: {precision:.4f}, 召回率: {recall:.4f}")
+
+def plot_accuracy_curve(train_accuracies, test_accuracies):
+    """绘制训练和测试准确率的折线图"""
+    plt.figure(figsize=(10, 6))
+    epochs = range(1, len(train_accuracies) + 1)
+    plt.plot(epochs, train_accuracies, 'b-', label='训练准确率')
+    plt.plot(epochs, test_accuracies, 'r-', label='测试准确率')
+    plt.title('训练和测试准确率随轮次的变化')
+    plt.xlabel('轮次')
+    plt.ylabel('准确率 (%)')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('accuracy_curve.png', dpi=300)
+    plt.show()
