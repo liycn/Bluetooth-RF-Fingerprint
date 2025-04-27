@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 # 复数张量的表示：原通道数为n，则将通道数分为2n，前n表示实部，后n表示虚部。
 
@@ -19,7 +20,7 @@ FILTER3_NUM = 256
 FILTER4_SIZE = 3
 FILTER4_NUM = 512
 FC1_SIZE = 256
-OUTPUT_NODE = 3  # 分类数量（默认为3个类别：bladerf, hackrf0, limesdr）
+OUTPUT_NODE = 4  # 分类数量（默认为3个类别：bladerf, hackrf0, hackrf1, limesdr）
 
 class ComplexConv2d(nn.Module):
     """复数卷积层实现"""
@@ -117,7 +118,7 @@ class ResidualBlock(nn.Module):
         return out
 
 class ComplexCNN(nn.Module):
-    """基于TensorFlow网络结构的PyTorch复数CNN实现"""
+    """基于PyTorch网络结构的复数CNN实现"""
     def __init__(self, num_features, num_classes=3):
         super(ComplexCNN, self).__init__()
         
@@ -177,6 +178,23 @@ class ComplexCNN(nn.Module):
         x = self.fc2(x)
         
         return x
+
+# 读取IQ数据文件
+def load_iq_file(file_path):
+    """读取原始IQ数据文件"""
+    # 根据你的.iq文件格式调整读取方式
+    # 通常.iq文件存储复数数据，I和Q交替存储
+    try:
+        # 尝试以复数形式读取
+        data = np.fromfile(file_path, dtype=np.complex64)
+    except:
+        # 如果失败，尝试以浮点数读取然后转换为复数
+        data = np.fromfile(file_path, dtype=np.float32)
+        # 假设数据是I和Q交替的形式
+        data = data[::2] + 1j * data[1::2]
+    
+    return data
+
 
 class ComplexSignalDataset(Dataset):
     """复数信号数据集"""
