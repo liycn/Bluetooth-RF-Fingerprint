@@ -267,7 +267,7 @@ def train_and_evaluate(model, train_loader, test_loader, device, num_epochs=30):
     
     # 训练循环
     for epoch in range(num_epochs):
-        print(f'第 {epoch+1}/{num_epochs} 轮,')
+        print(f'第 {epoch+1}/{num_epochs} 轮')
         # 训练
         model.train()
         train_loss = 0
@@ -334,6 +334,8 @@ def get_predictions(model, data_loader, device):
 
 def plot_confusion_matrix(y_true, y_pred, class_names):
     """绘制混淆矩阵"""
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体，支持中文
+    plt.rcParams['axes.unicode_minus'] = False    # 解决负号 '-' 显示异常
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
@@ -353,6 +355,8 @@ def plot_confusion_matrix(y_true, y_pred, class_names):
 
 def plot_accuracy_curve(train_accuracies, test_accuracies):
     """绘制训练和测试准确率的折线图"""
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体，支持中文
+    plt.rcParams['axes.unicode_minus'] = False    # 解决负号 '-' 显示异常
     plt.figure(figsize=(10, 6))
     epochs = range(1, len(train_accuracies) + 1)
     plt.plot(epochs, train_accuracies, 'b-', label='训练准确率')
