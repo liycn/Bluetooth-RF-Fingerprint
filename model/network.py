@@ -264,6 +264,10 @@ def train_and_evaluate(model, train_loader, test_loader, device, num_epochs=30):
     # 记录训练和测试准确率
     train_accuracies = []
     test_accuracies = []
+
+    acc_max = 0
+    acc_count = 0
+    model_growth = ["初生", "萌芽", "苏醒", "起步", "启航", "探索", "积累", "成长", "蜕变", "磨砺", "进步", "升华", "拓展", "蓄力", "突破", "壮大", "深化", "淬炼", "涌现", "飞跃", "成熟", "觉醒", "绽放", "升腾", "超越", "淬火", "涅槃", "进化", "极致", "究极形态"]
     
     # 训练循环
     for epoch in range(num_epochs):
@@ -291,7 +295,7 @@ def train_and_evaluate(model, train_loader, test_loader, device, num_epochs=30):
         train_acc = 100. * correct / total
         train_accuracies.append(train_acc)
         print(f'♂️ trainLoss: {train_loss/len(train_loader):.4f}, trainAcc: {train_acc:.2f}%')
-        
+              
         # 验证
         model.eval()
         test_loss = 0
@@ -312,6 +316,15 @@ def train_and_evaluate(model, train_loader, test_loader, device, num_epochs=30):
         test_acc = 100. * correct / total
         test_accuracies.append(test_acc)
         print(f'♀️ testLoss: {test_loss/len(test_loader):.4f}, testAcc: {test_acc:.2f}%')
+
+        if test_acc > acc_max:
+            acc_max = test_acc
+            # 保存模型
+            torch.save(model.state_dict(), './models/complex_cnn_model_.pth')
+            
+            print(f'!!!!什么!! 模型已经{model_growth[acc_count]}了!#@!%^&($)')
+            acc_count += 1
+
     
     return train_accuracies, test_accuracies
 
